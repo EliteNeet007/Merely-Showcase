@@ -1,0 +1,18 @@
+{
+    "name": "RightNowGames.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:389dadbfc7e6df94abce734eeec49ad3"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
