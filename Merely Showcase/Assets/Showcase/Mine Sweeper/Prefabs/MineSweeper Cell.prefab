@@ -190,6 +190,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9106656320999450618}
   - component: {fileID: 3701385425045320098}
+  - component: {fileID: 8990480150748564662}
   m_Layer: 0
   m_Name: MineSweeper Cell
   m_TagString: Untagged
@@ -273,6 +274,25 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &8990480150748564662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2398829911166714262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d766aedeb6f1e643a9fb4cb90521f32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MineSweeperCellVisual
+  _cellForegroundVisual: {fileID: 5816212034493372888}
+  _cellBackgroundVisual: {fileID: 3701385425045320098}
+  _flagObject: {fileID: 2284049391199997590}
+  _numberText: {fileID: 802075196490361319}
+  _mineSprite: {fileID: 21300000, guid: d48e260984087a744993ff2383c3d8f7, type: 3}
+  _cellForegroundSprite: {fileID: 21300000, guid: 78afee2c5931a3042a979fe1d6dea04d, type: 3}
+  _mineBackgroundColor: {r: 0.9245283, g: 0.13519046, b: 0.22253639, a: 1}
 --- !u!1 &4561022166311165909
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,7 +310,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5571705758392151322
 RectTransform:
   m_ObjectHideFlags: 0

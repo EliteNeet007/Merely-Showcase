@@ -420,6 +420,15 @@ namespace RightNowGames.Grids
 			return new Vector2Int(axis1, axis2);
 		}
 
+		/// <summary>
+        /// Returns the int position values of a random cell on the board.
+        /// </summary>
+        /// <returns></returns>
+		public Vector2Int GetRandomCell()
+        {
+            return new Vector2Int(UnityEngine.Random.Range(0, _gridWidth), UnityEngine.Random.Range(0, _gridHeight));
+        }
+
 		#endregion
 
 		#region Get World Position Methods
@@ -1008,6 +1017,17 @@ namespace RightNowGames.Grids
 			// The returned value is always bigger than the minimum requiremnent by additionalSize to create a buffer.
 			return ((_gridHeight * _cellSize) / 2) + additionalSize;
 		}
+
+		/// <summary>
+        /// Returns a Vector3 positional value to properly place the camera.<br/>
+		/// The returned value is meant to be used to place the camera alligned to the center of the grid.
+        /// </summary>
+        /// <param name="zAxisDepth"></param>
+        /// <returns></returns>
+		public Vector3 GetGridCameraPosition(float zAxisDepth = -10)
+        {
+            return _originPosition + new Vector3(_gridWidth / 2, _gridHeight / 2, zAxisDepth);
+        }
 
 		#endregion
 
