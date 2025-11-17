@@ -23,7 +23,7 @@ namespace RightNowGames.Utilities
 		/// Destroy all child objects of this transform.
 		/// </summary>
 		/// <param name="parent"></param>
-		public static void DestroyChildren(this Transform parent)
+		public static void DestroyAllChildren(this Transform parent)
 		{
 			parent.PerformActionOnChildren(child => Object.Destroy(child.gameObject));
 		}

@@ -102,4 +102,6 @@ public class MineSweeperCellVisual : MonoBehaviour
         _cellBackgroundVisual.color = Color.white;
         _cellForegroundVisual.sprite = _cellForegroundSprite;
     }
+
+    
 }

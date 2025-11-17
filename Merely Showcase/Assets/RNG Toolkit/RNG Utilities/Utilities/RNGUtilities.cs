@@ -115,7 +115,7 @@ namespace RightNowGames.Utilities
 			}
 
 			// Print the resulting string to the console.
-			Debug.Log(sb.ToString());
+			//Debug.Log(sb.ToString());
 		}
 
 		private static void PrintSubsystem(PlayerLoopSystem system, StringBuilder sb, int level)

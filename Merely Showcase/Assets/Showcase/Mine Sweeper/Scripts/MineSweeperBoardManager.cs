@@ -5,7 +5,7 @@ using RightNowGames.Utilities;
 
 public class MineSweeperBoardManager : MonoBehaviour
 {
-    private List<Vector2Int> CellNeighborOffsets = new List<Vector2Int>
+    private readonly List<Vector2Int> _cellNeighborOffsets = new List<Vector2Int>
     {
         new(-1, -1),
         new(-1, 0),
@@ -24,24 +24,46 @@ public class MineSweeperBoardManager : MonoBehaviour
         Mine,
     }
 
+    [Header("Asset References")]
+    [SerializeField]
+    private MineSweeperEventsSO _mineSweeperEvents;
     [SerializeField]
     private GameObject _gridCellPrefab;
+    [SerializeField]
+    private GameObject _gridBackgroundPrefab;
+
+    [Header("Placement Parameters")]
+    [SerializeField]
+    private float _cameraVerticalOffset;
+    [SerializeField]
+    private float _additionalCameraOrthographicSize;
+    [SerializeField]
+    private float _gridBackgroundAdditionalSize;
 
     private Grid2D<MineSweeperCellContents> _gameBoard;
     private MineSweeperCellVisual[,] _boardVisuals;
+    private GameObject _gridBackgroundVisual;
     private bool _boardIsPopulated;
     private bool _gameInProgress;
     private int _gridWidth;
     private int _gridHeight;
     private int _mineCount;
+    private int _flagsLeft;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void OnDisable()
     {
-        InitiallizeGameAndBoard();
+        _mineSweeperEvents.OnStartGame -= InitiallizeGameAndBoard;
+        _mineSweeperEvents.OnPlayAgain -= ResetBoard;
+        _mineSweeperEvents.OnReturnToSetup -= ClearBoard;
     }
 
-    // Update is called once per frame
+    private void OnEnable()
+    {
+        _mineSweeperEvents.OnStartGame += InitiallizeGameAndBoard;
+        _mineSweeperEvents.OnPlayAgain += ResetBoard;
+        _mineSweeperEvents.OnReturnToSetup += ClearBoard;
+    }
+
     void Update()
     {
         if (!_gameInProgress) return;
@@ -54,14 +76,16 @@ public class MineSweeperBoardManager : MonoBehaviour
     /// 1. Sets the board parameters.<br/>
     /// 2. Initiallizes the underlying grid.<br/>
     /// 3. Spawns the grid cells.<br/>
-    /// 4. Positions the camera based on the grid's size.
+    /// 4. Sets the camera based on the grid's size.<br/>
+    /// 5. Place grid background and resize.
     /// </summary>
     private void InitiallizeGameAndBoard()
     {
         // Set Board Parameters.
-        _gridWidth = 10;
-        _gridHeight = 10;
-        _mineCount = 10;
+        _gridWidth = MineSweeperManager.Instance.LevelGridWidth;
+        _gridHeight = MineSweeperManager.Instance.LevelGridHeight;
+        _mineCount = MineSweeperManager.Instance.LevelMineCount;
+        _flagsLeft = _mineCount;
         _boardIsPopulated = false;
         _gameInProgress = true;
 
@@ -76,15 +100,23 @@ public class MineSweeperBoardManager : MonoBehaviour
             for (int y = 0; y < _gridHeight; y++)
             {
                 // Spawn cell.
-                _boardVisuals[x, y] = Instantiate(_gridCellPrefab, spawnOffset.Add(x: x, y: y), Quaternion.identity).GetComponent<MineSweeperCellVisual>();
+                _boardVisuals[x, y] = Instantiate(_gridCellPrefab, spawnOffset.Add(x: x, y: y), Quaternion.identity, gameObject.transform).GetComponent<MineSweeperCellVisual>();
                 // Ensure the cell's values are set to their proper default values.
                 _boardVisuals[x, y].ResetCell();
             }
         }
 
         // Move the camera into place and change it's size.
-        Camera.main.orthographicSize = _gameBoard.GetCameraOrthographicSize();
-        Camera.main.transform.position = _gameBoard.GetGridCameraPosition();
+        Camera.main.transform.position = _gameBoard.GetGridCameraPosition().Add(y: _cameraVerticalOffset);
+        Camera.main.orthographicSize = _gameBoard.GetCameraOrthographicSize(_additionalCameraOrthographicSize);
+
+        // Place the grid background and change it's size.
+        _gridBackgroundVisual = Instantiate(_gridBackgroundPrefab, _gameBoard.GetGridCenterWorldPosition(1), Quaternion.identity);
+        _gridBackgroundVisual.transform.localScale = new Vector3(_gridWidth + _gridBackgroundAdditionalSize, _gridHeight + _gridBackgroundAdditionalSize, 1);
+
+        // Enable and set the gameplay UI.
+        MineSweeperGameplayUI.Instance.ShowGameplayUI();
+        MineSweeperGameplayUI.Instance.SetFlagsLeftText(_flagsLeft);
     }
 
     /// <summary>
@@ -106,14 +138,21 @@ public class MineSweeperBoardManager : MonoBehaviour
 
     private void PlaceMines(Vector2Int invalidMinePosition)
     {
+        List<Vector2Int> invalidMinePositions = new() { invalidMinePosition };
+        for (int i = 0; i < _cellNeighborOffsets.Count; i++)
+        {
+            invalidMinePositions.Add(invalidMinePosition + _cellNeighborOffsets[i]);
+        }
+
         int minesPlaced = 0;
         while (minesPlaced < _mineCount)
         {
             // Generate random board position to place a mine in.
             Vector2Int minePosition = _gameBoard.GetRandomCell();
 
-            // Ensure we do not place a mine where the player has made their first click.
-            if (minePosition == invalidMinePosition) continue;
+            // Ensure we do not place a mine where the player has made their first click, or in the 8 neighboring cells.
+            // This ensures the player's first click will be an empty cell and lead to a mass-reveal.
+            if (invalidMinePositions.Contains(minePosition)) continue;
             // Ensure we do not place more than 1 mine in the same position.
             else if (_gameBoard.GetGridObject(minePosition) == MineSweeperCellContents.Mine) continue;
             // Place the mine.
@@ -140,9 +179,9 @@ public class MineSweeperBoardManager : MonoBehaviour
                     mineNeighborCount = 0;
 
                     // Calculate the number of mine neighbors for the current cell.
-                    for (int i = 0; i < CellNeighborOffsets.Count; i++)
+                    for (int i = 0; i < _cellNeighborOffsets.Count; i++)
                     {
-                        Vector2Int neighborPosition = new(x + CellNeighborOffsets[i].x, y + CellNeighborOffsets[i].y);
+                        Vector2Int neighborPosition = new(x + _cellNeighborOffsets[i].x, y + _cellNeighborOffsets[i].y);
                         if (_gameBoard.IsValidGridPosition(neighborPosition) &&
                         _gameBoard.GetGridObject(neighborPosition) == MineSweeperCellContents.Mine) mineNeighborCount++;
                     }
@@ -217,8 +256,13 @@ public class MineSweeperBoardManager : MonoBehaviour
                 // Ensure we do not unnecessarily perform actions in response to an already-revealed cell.
                 if (_boardVisuals[boardClickPosition.x, boardClickPosition.y].IsRevealed) return;
 
+                // Tracks how many flags are left to be placed, increses/decreases based on the currnet vacell value - before flipping it.
+                if (_boardVisuals[boardClickPosition.x, boardClickPosition.y].IsFlagged) _flagsLeft++;
+                else _flagsLeft--;
                 // Either places or removes a flag mark on the clicked cell.
                 _boardVisuals[boardClickPosition.x, boardClickPosition.y].FlipFlaggedState();
+
+                MineSweeperGameplayUI.Instance.SetFlagsLeftText(_flagsLeft);
             }
         }
     }
@@ -228,9 +272,9 @@ public class MineSweeperBoardManager : MonoBehaviour
         bool validReveal = false;
         int correctlyMarkedMines = 0;
 
-        for (int i = 0; i < CellNeighborOffsets.Count; i++)
+        for (int i = 0; i < _cellNeighborOffsets.Count; i++)
         {
-            Vector2Int neighborPosition = cellPosition + CellNeighborOffsets[i];
+            Vector2Int neighborPosition = cellPosition + _cellNeighborOffsets[i];
 
             if (_gameBoard.IsValidGridPosition(neighborPosition))
             {
@@ -269,9 +313,9 @@ public class MineSweeperBoardManager : MonoBehaviour
             Vector2Int currentCell = emptyCellsToHandle.Dequeue();
             
             // Cycle through all the cell's neighbors.
-            for (int i = 0; i < CellNeighborOffsets.Count; i++)
+            for (int i = 0; i < _cellNeighborOffsets.Count; i++)
             {
-                Vector2Int neighborPosition = currentCell + CellNeighborOffsets[i];
+                Vector2Int neighborPosition = currentCell + _cellNeighborOffsets[i];
 
                 // Ensure the neighbor position is a valid position on the grid.
                 if (_gameBoard.IsValidGridPosition(neighborPosition))
@@ -323,8 +367,10 @@ public class MineSweeperBoardManager : MonoBehaviour
 
         RevealAllCells();
 
-        if (gameWon) Debug.Log("Game Complete - You Won!");
-        else Debug.Log("Game Over - You Lost...");
+        // Hide gameplay UI.
+        MineSweeperGameplayUI.Instance.HideGameplayUI();
+
+        _mineSweeperEvents.TriggerGameFinished(gameWon);
     }
 
     private void RevealAllCells()
@@ -337,4 +383,24 @@ public class MineSweeperBoardManager : MonoBehaviour
             }
         }
     }
+
+    private void ResetBoard()
+    {
+        ClearBoard();
+
+        InitiallizeGameAndBoard();
+    }
+
+    private void ClearBoard()
+    {
+        // Destroy board visuals.
+        gameObject.transform.DestroyAllChildren();
+        Destroy(_gridBackgroundVisual);
+
+        // Clear grid references.
+        _gameBoard = null;
+        _boardVisuals = null;
+    }
+
+
 }
