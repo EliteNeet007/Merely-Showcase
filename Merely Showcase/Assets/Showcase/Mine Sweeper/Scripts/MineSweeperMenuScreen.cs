@@ -2,6 +2,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// Manages the menu screen, where players can choose the type of puzzle the system will generate for them.
+/// </summary>
 public class MineSweeperMenuScreen : MonoBehaviour
 {
     [Header("Asset References")]
@@ -60,6 +63,7 @@ public class MineSweeperMenuScreen : MonoBehaviour
 
     private void OnEnable()
     {
+        // Event Subscription: When the "return to setup" event is called - show the menu screen.
         _mineSweeperEvents.OnReturnToSetup += ShowMenuPanel;
     }
 
@@ -68,21 +72,26 @@ public class MineSweeperMenuScreen : MonoBehaviour
         UpdateLevelSetupVisuals();
     }
 
+    /// <summary>
+    /// Updates all menu visuals to ensure the "planned" level parameters are accurately presented to the player.
+    /// </summary>
     public void UpdateLevelSetupVisuals()
     {
-        // Show/Hide height slider.
+        // 1. Show/Hide height slider.
         if (_heightEqualsWidthToggle.isOn) _heightSliderParent.SetActive(false);
         else _heightSliderParent.SetActive(true);
 
-        // Get slider values.
+        // 2. Get slider values.
         int widthSliderValue = (int)_widthSlider.value;
         int heightSliderValue = _heightEqualsWidthToggle.isOn ? (int)_widthSlider.value : (int)_heightSlider.value;
         int mineSliderValue = (int)_mineCountSlider.value;
         
-        // Calculate current setup parameters level size.
+        // 3. Calculate current setup parameters total cells (level size - width * height).
         int totalCells = widthSliderValue * heightSliderValue;
 
-        // Set mine slider range based on enforcement toggle.
+        // 4. Set mine slider range based on enforcement toggle:
+        // Soft enforcement means the player chooses a difficulty level,
+        // the number of mines will be randomized based on the difficulty from an appropriate range.
         if (_mineSoftEnforcementToggle.isOn)
         {
             _mineCountSlider.maxValue = 3;
@@ -94,6 +103,7 @@ public class MineSweeperMenuScreen : MonoBehaviour
                 mineSliderValue = (int)_mineCountSlider.value;
             }
         }
+        // Hard enforcement means the player can choose the specific number of mines they will have, between an upper/lower limit.
         else
         {
             _mineCountSlider.maxValue = Mathf.Ceil(totalCells * _maxMineCountMultiplier);
@@ -106,10 +116,11 @@ public class MineSweeperMenuScreen : MonoBehaviour
             }
         }
 
-        // Set slider value displays.
+        // 5. Set slider value displays.
         _widthSliderTextDisplay.text = widthSliderValue.ToString();
         _heightSliderTextDisplay.text = heightSliderValue.ToString();
 
+        // Sets mine slider display based on current enforcement type.
         if (_mineSoftEnforcementToggle.isOn)
         {
             switch (mineSliderValue)
@@ -133,14 +144,20 @@ public class MineSweeperMenuScreen : MonoBehaviour
         else _mineCountSliderTextDisplay.text = mineSliderValue.ToString();
     }
 
+    /// <summary>
+    /// Hnadles the process to start the game.<br/><br/>
+    /// 1. Calculate level parameters.<br/>
+    /// 2. Set parameters to manager for easy access.<br/>
+    /// 3 & 4. hide menu and start the game.
+    /// </summary>
     public void StartGame()
     {
-        // Calculate Level Parameters:
-        // 1. Width.
+        // 1. Calculate Level Parameters:
+        // Width.
         int width = (int)_widthSlider.value;
-        // 2. Height.
+        // Height.
         int height = _heightEqualsWidthToggle.isOn ? (int)_widthSlider.value : (int)_heightSlider.value;
-        // 3. Mine Count.
+        // Mine Count.
         int totalCells = width * height;
         int mineCount;
         if (_mineSoftEnforcementToggle.isOn)
@@ -165,19 +182,26 @@ public class MineSweeperMenuScreen : MonoBehaviour
         }
         else mineCount = (int)_mineCountSlider.value;
 
-        // Set level parameters.
+        // 2. Set level parameters in the Manager (ease of access).
         MineSweeperManager.Instance.SetLevelParameters(width, height, mineCount);
         
-        // Hide menu screen.
+        // 3. Hide menu screen.
         _menuPanel.SetActive(false);
 
-        // Start the level.
-        MineSweeperManager.Instance.StartGame();
+        // 4. Start the level - calls "start game" event.
+        _mineSweeperEvents.TriggerStartGame();
     }
 
+    /// <summary>
+    /// Reveals the menu screen.
+    /// </summary>
     private void ShowMenuPanel()
     {
+        // Enable menu screen object.
         _menuPanel.SetActive(true);
+        // Update menu screen visual (just to be safe).
         UpdateLevelSetupVisuals();
     }
+
+
 }

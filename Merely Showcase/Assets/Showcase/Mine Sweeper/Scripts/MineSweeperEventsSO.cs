@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Centralized event hub for minesweeper.
+/// </summary>
 [CreateAssetMenu(fileName = "MineSweeperEventsSO", menuName = "Scriptable Objects/MineSweeperEventsSO")]
 public class MineSweeperEventsSO : ScriptableObject
 {

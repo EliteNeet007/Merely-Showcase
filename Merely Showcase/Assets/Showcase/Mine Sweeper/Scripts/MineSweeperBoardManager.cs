@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using RightNowGames.Grids;
 using RightNowGames.Utilities;
 
+/// <summary>
+/// Responsible for managing the game board - the entire logic where the puzzle is located.
+/// </summary>
 public class MineSweeperBoardManager : MonoBehaviour
 {
     private readonly List<Vector2Int> _cellNeighborOffsets = new List<Vector2Int>
@@ -59,13 +62,20 @@ public class MineSweeperBoardManager : MonoBehaviour
 
     private void OnEnable()
     {
+        // Event Subscriptions:
+        // Initiallize game board when the "game start" event is called.
         _mineSweeperEvents.OnStartGame += InitiallizeGameAndBoard;
+
+        // Reset the board when the "play again" event is called.
         _mineSweeperEvents.OnPlayAgain += ResetBoard;
+        
+        // Clear the board when the "return to setup" event is called.
         _mineSweeperEvents.OnReturnToSetup += ClearBoard;
     }
 
     void Update()
     {
+        // Make sure the update loop does not run when the minesweeper game is not in progress.
         if (!_gameInProgress) return;
 
         HandlePlayerInput();
@@ -77,11 +87,12 @@ public class MineSweeperBoardManager : MonoBehaviour
     /// 2. Initiallizes the underlying grid.<br/>
     /// 3. Spawns the grid cells.<br/>
     /// 4. Sets the camera based on the grid's size.<br/>
-    /// 5. Place grid background and resize.
+    /// 5. Place grid background and resize.<br/>
+    /// 6. Initializes gameplay UI.
     /// </summary>
     private void InitiallizeGameAndBoard()
     {
-        // Set Board Parameters.
+        // 1. Set Board Parameters.
         _gridWidth = MineSweeperManager.Instance.LevelGridWidth;
         _gridHeight = MineSweeperManager.Instance.LevelGridHeight;
         _mineCount = MineSweeperManager.Instance.LevelMineCount;
@@ -89,10 +100,10 @@ public class MineSweeperBoardManager : MonoBehaviour
         _boardIsPopulated = false;
         _gameInProgress = true;
 
-        // Initialize Game Board.
+        // 2. Initialize Game Board.
         _gameBoard = new Grid2D<MineSweeperCellContents>(_gridWidth, _gridHeight, Vector3.zero);
 
-        // Spawn Board Cells.
+        // 3. Spawn Board Cells.
         _boardVisuals = new MineSweeperCellVisual[_gridWidth, _gridHeight];
         Vector3 spawnOffset = new Vector3(0.5f, 0.5f, 0);
         for (int x = 0; x < _gridWidth; x++)
@@ -106,15 +117,15 @@ public class MineSweeperBoardManager : MonoBehaviour
             }
         }
 
-        // Move the camera into place and change it's size.
+        // 4. Move the camera into place and change it's size.
         Camera.main.transform.position = _gameBoard.GetGridCameraPosition().Add(y: _cameraVerticalOffset);
         Camera.main.orthographicSize = _gameBoard.GetCameraOrthographicSize(_additionalCameraOrthographicSize);
 
-        // Place the grid background and change it's size.
+        // 5. Place the grid background and change it's size.
         _gridBackgroundVisual = Instantiate(_gridBackgroundPrefab, _gameBoard.GetGridCenterWorldPosition(1), Quaternion.identity);
         _gridBackgroundVisual.transform.localScale = new Vector3(_gridWidth + _gridBackgroundAdditionalSize, _gridHeight + _gridBackgroundAdditionalSize, 1);
 
-        // Enable and set the gameplay UI.
+        // 6. Enable and set the gameplay UI.
         MineSweeperGameplayUI.Instance.ShowGameplayUI();
         MineSweeperGameplayUI.Instance.SetFlagsLeftText(_flagsLeft);
     }
@@ -127,15 +138,19 @@ public class MineSweeperBoardManager : MonoBehaviour
     /// <param name="invalidMinePosition"></param>
     private void PopulateBoard(Vector2Int invalidMinePosition)
     {
-        _boardIsPopulated = true;
-
         // Mine Placement.
         PlaceMines(invalidMinePosition);
 
         // Cell Number Calculation.
         AssignCellNumbers();
+
+        _boardIsPopulated = true;
     }
 
+    /// <summary>
+    /// Randomly selects board positions to place mines in and sets the underlying logic.
+    /// </summary>
+    /// <param name="invalidMinePosition"></param>
     private void PlaceMines(Vector2Int invalidMinePosition)
     {
         List<Vector2Int> invalidMinePositions = new() { invalidMinePosition };
@@ -165,6 +180,9 @@ public class MineSweeperBoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Calculates which cells contain numbers and sets the underlying logic.
+    /// </summary>
     private void AssignCellNumbers()
     {
         int mineNeighborCount;
@@ -174,6 +192,7 @@ public class MineSweeperBoardManager : MonoBehaviour
         {
             for (int y = 0; y < _gridHeight; y++)
             {
+                // Mine cells cannot be numbered cells, so first we ensure the current cell we are working on is not a mine.
                 if (_gameBoard.GetGridObject(x, y) != MineSweeperCellContents.Mine)
                 {
                     mineNeighborCount = 0;
@@ -181,7 +200,9 @@ public class MineSweeperBoardManager : MonoBehaviour
                     // Calculate the number of mine neighbors for the current cell.
                     for (int i = 0; i < _cellNeighborOffsets.Count; i++)
                     {
+                        // Current neighbor position.
                         Vector2Int neighborPosition = new(x + _cellNeighborOffsets[i].x, y + _cellNeighborOffsets[i].y);
+                        // Check if the position is valid & contains a mine, if so - increase count.
                         if (_gameBoard.IsValidGridPosition(neighborPosition) &&
                         _gameBoard.GetGridObject(neighborPosition) == MineSweeperCellContents.Mine) mineNeighborCount++;
                     }
@@ -194,6 +215,11 @@ public class MineSweeperBoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Player Input Handler.<br/><br/>
+    /// 1. Left-Click -> cell reveal related logic.<br/>
+    /// 2. Right-Click -> flag marker placement logic.
+    /// </summary>
     private void HandlePlayerInput()
     {
         // Track mouse position.
@@ -267,35 +293,92 @@ public class MineSweeperBoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Handles the logic to reveal all neighbors of an already-revealed number cell that was clicked again.
+    /// </summary>
+    /// <param name="cellPosition"></param>
+    /// <returns></returns>
     private bool RevealNeighborCells(Vector2Int cellPosition)
     {
-        bool validReveal = false;
+        bool validNeighborReveal = false;
         int correctlyMarkedMines = 0;
+        List<Vector2Int> neighborCellsToReveal = new();
+        List<Vector2Int> emptyNeighborCells = new();
 
+        // Pass over all neighbor positions.
         for (int i = 0; i < _cellNeighborOffsets.Count; i++)
         {
             Vector2Int neighborPosition = cellPosition + _cellNeighborOffsets[i];
 
+            // Ensure the calculated neighbor position is a valid grid position.
             if (_gameBoard.IsValidGridPosition(neighborPosition))
             {
-                if (!_boardVisuals[neighborPosition.x, neighborPosition.y].IsFlagged)
+                // Check if the current position is empty, to be able to follow it through to an empty cell mass reveal.
+                if (_gameBoard.GetGridObject(neighborPosition) == MineSweeperCellContents.Empty)
                 {
-                    _boardVisuals[neighborPosition.x, neighborPosition.y].RevealCell();
+                    emptyNeighborCells.Add(neighborPosition);
                 }
 
-                if (_gameBoard.GetGridObject(neighborPosition) == MineSweeperCellContents.Mine
-                && _boardVisuals[neighborPosition.x, neighborPosition.y].IsFlagged)
+                // Ensure the current position is not flagged - we do not reveal flagged cells.
+                if (!_boardVisuals[neighborPosition.x, neighborPosition.y].IsFlagged)
+                {
+                    neighborCellsToReveal.Add(new Vector2Int(neighborPosition.x, neighborPosition.y));
+                }
+                // If the current position is flagged, we check if it is a mine.
+                // If the position is BOTH flagged AND a mine - it counts toward the click that resulted in calling this method being a valid action.
+                else if (_gameBoard.GetGridObject(neighborPosition) == MineSweeperCellContents.Mine)
                 {
                     correctlyMarkedMines++;
                 }
             }
         }
 
-        if (correctlyMarkedMines == _boardVisuals[cellPosition.x, cellPosition.y].Number) validReveal = true;
+        // Check if the tracker for correctly flagged mine neighbors equals to the number value of the clicked cell.
+        // If it is - this reveal action was valid.
+        if (correctlyMarkedMines == _boardVisuals[cellPosition.x, cellPosition.y].Number) validNeighborReveal = true;
 
-        return validReveal;
+        // If the reveal action is valid & some of the neighbors are empty - we use these empty cells to create mass reveal calls.
+        if (validNeighborReveal)
+        {
+            if (emptyNeighborCells.Count > 0)
+            {
+                // Remove empty cells from the neighbor reveal list (no need to reveal these multiple times).
+                neighborCellsToReveal.RemoveWholeList(emptyNeighborCells);
+
+                // Reveal neighbors.
+                if (neighborCellsToReveal.Count > 0)
+                {
+                    for (int i = 0; i < neighborCellsToReveal.Count; i++)
+                    {
+                        _boardVisuals[neighborCellsToReveal[i].x, neighborCellsToReveal[i].y].RevealCell();
+                    }
+                }
+
+                // Reveal empty cells using the sweeping reveal logic.
+                for (int i = 0; i < emptyNeighborCells.Count; i++)
+                {
+                    EmptyClickSweepingReveal(emptyNeighborCells[i]);
+                }
+            }
+            else
+            {
+                // Reveal neighbors.
+                for (int i = 0; i < neighborCellsToReveal.Count; i++)
+                {
+                    _boardVisuals[neighborCellsToReveal[i].x, neighborCellsToReveal[i].y].RevealCell();
+                }
+            }
+        }
+
+        // Return bool result reagrding reveal action validity.
+        return validNeighborReveal;
     }
 
+    /// <summary>
+    /// Reveals the empty cell that was clicked and all it's neighbor cells.<br/>
+    /// if it has empty neighbors - also reveals all their neighbors, and so on...
+    /// </summary>
+    /// <param name="cellPosition"></param>
     private void EmptyClickSweepingReveal(Vector2Int cellPosition)
     {
         Queue<Vector2Int> emptyCellsToHandle = new(); // The list of empty cells to check.
@@ -344,12 +427,16 @@ public class MineSweeperBoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checkers method to see if the game has been won.
+    /// </summary>
     private void CheckIfGameWon()
     {
+        // Ensure we do not perform this check if the game is not in progress.
         if (!_gameInProgress) return;
 
+        // Calculate how many cells are left to reveal.
         int cellsRemaining = 0;
-
         for (int x = 0; x < _gridWidth; x++)
         {
             for (int y = 0; y < _gridHeight; y++)
@@ -358,21 +445,32 @@ public class MineSweeperBoardManager : MonoBehaviour
             }
         }
 
+        // If the number of cells left to reveal equals the number of mines the game is won.
         if (cellsRemaining == _mineCount) GameComplete(gameWon: true);
     }
 
+    /// <summary>
+    /// Handles the game's completion (Win/Lose).
+    /// </summary>
+    /// <param name="gameWon"></param>
     private void GameComplete(bool gameWon = true)
     {
+        // Track game finished, to disable Update loop.
         _gameInProgress = false;
 
+        // Reveal all still-hidden cells.
         RevealAllCells();
 
         // Hide gameplay UI.
         MineSweeperGameplayUI.Instance.HideGameplayUI();
 
+        // Trigger game finished event.
         _mineSweeperEvents.TriggerGameFinished(gameWon);
     }
 
+    /// <summary>
+    /// Reveals all cells on the board.
+    /// </summary>
     private void RevealAllCells()
     {
         for (int x = 0; x < _gridWidth; x++)
@@ -384,13 +482,23 @@ public class MineSweeperBoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Resets the board.<br/><br/>
+    /// 1. Destroys all board visuals.
+    /// 2. Respawns a new board, all values reset.
+    /// </summary>
     private void ResetBoard()
     {
+        // Destroy current game board.
         ClearBoard();
 
+        // Spawn a new game board.
         InitiallizeGameAndBoard();
     }
 
+    /// <summary>
+    /// Destroys the current game board and resets underlying logic references.
+    /// </summary>
     private void ClearBoard()
     {
         // Destroy board visuals.

@@ -72,6 +72,35 @@ namespace RightNowGames.Utilities
 		}
 
 		/// <summary>
+        /// Add an entire other list to this list, essentially merging the list.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="listToAddTo"></param>
+        /// <param name="listToAdd"></param>
+		public static void AddWholeList<T>(this IList<T> listToAddTo, IList<T> listToAdd)
+        {
+            for (int i = 0; i < listToAdd.Count; i++)
+			{
+				listToAddTo.Add(listToAdd[i]);
+			}
+        }
+
+		/// <summary>
+        /// Removes the full list to bve removed from the main list.<br/>
+		/// Ensures we do not try to remove an item that is not present before we remove it.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="listToRemoveFrom"></param>
+        /// <param name="listToRemove"></param>
+		public static void RemoveWholeList<T>(this IList<T> listToRemoveFrom, IList<T> listToRemove)
+        {
+            for (int i = 0; i < listToRemove.Count; i++)
+			{
+				if (listToRemoveFrom.Contains(listToRemove[i])) listToRemoveFrom.Remove(listToRemove[i]);
+			}
+        }
+
+		/// <summary>
 		/// Converts the extended List to a Queue of the same type.
 		/// </summary>
 		/// <typeparam name="T"></typeparam>

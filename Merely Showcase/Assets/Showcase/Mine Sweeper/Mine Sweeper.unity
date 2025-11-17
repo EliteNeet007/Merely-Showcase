@@ -3506,6 +3506,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MineSweeperManager
   _mineSweeperEvents: {fileID: 11400000, guid: 903ba3549a8dc0b47a5e8c8e541f4dd8, type: 2}
+  _numberTextColors:
+  - {r: 0, g: 0.96862745, b: 1, a: 1}
+  - {r: 0.078431375, g: 0.8784314, b: 0.078431375, a: 1}
+  - {r: 0.9372549, g: 0.101960786, b: 0.25490198, a: 1}
+  - {r: 0.7921569, g: 0, b: 1, a: 1}
+  - {r: 1, g: 0.7176471, b: 0, a: 1}
+  - {r: 0.20392157, g: 0.3372549, b: 1, a: 1}
+  - {r: 0.5294118, g: 0.85882354, b: 0, a: 1}
+  - {r: 0.6431373, g: 0.41960785, b: 0.06666667, a: 1}
 --- !u!4 &1388731123
 Transform:
   m_ObjectHideFlags: 0

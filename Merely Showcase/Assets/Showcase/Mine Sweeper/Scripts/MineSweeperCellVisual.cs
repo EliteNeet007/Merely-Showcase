@@ -2,6 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
 
+/// <summary>
+/// Responsible for the visual representation of a single board cell in the minesweeper game.
+/// </summary>
 public class MineSweeperCellVisual : MonoBehaviour
 {
     [Header("Object References")]
@@ -41,7 +44,7 @@ public class MineSweeperCellVisual : MonoBehaviour
     /// </summary>
     public void FlipFlaggedState()
     {
-        // Set visual.
+        // Set visual active state.
         if (_isFlagged) _flagObject.SetActive(false);
         else _flagObject.SetActive(true);
 
@@ -55,8 +58,14 @@ public class MineSweeperCellVisual : MonoBehaviour
     /// <param name="value"></param>
     public void SetNumber(int value)
     {
+        // Cache number value.
         _number = value;
-        if (_number > 0) _numberText.text = _number.ToString();
+        // Assign number text & color.
+        if (_number > 0)
+        {
+            _numberText.text = _number.ToString();
+            _numberText.color = MineSweeperManager.Instance.NumberTextColor[_number - 1];
+        }
     }
 
     /// <summary>
@@ -89,7 +98,7 @@ public class MineSweeperCellVisual : MonoBehaviour
     }
 
     /// <summary>
-    /// Changes the cell back to it's starting values.
+    /// Sets the cell to it's starting (default) values.
     /// </summary>
     public void ResetCell()
     {
@@ -98,6 +107,7 @@ public class MineSweeperCellVisual : MonoBehaviour
         _isFlagged = false;
         _isRevealed = false;
         _numberText.text = "";
+        _numberText.color = Color.white;
         _flagObject.SetActive(false);
         _cellBackgroundVisual.color = Color.white;
         _cellForegroundVisual.sprite = _cellForegroundSprite;
