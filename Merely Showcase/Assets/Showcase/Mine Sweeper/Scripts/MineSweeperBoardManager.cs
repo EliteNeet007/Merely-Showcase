@@ -28,20 +28,14 @@ public class MineSweeperBoardManager : MonoBehaviour
     }
 
     [Header("Asset References")]
-    [SerializeField]
-    private MineSweeperEventsSO _mineSweeperEvents;
-    [SerializeField]
-    private GameObject _gridCellPrefab;
-    [SerializeField]
-    private GameObject _gridBackgroundPrefab;
+    [SerializeField] private MineSweeperEventsSO _mineSweeperEvents;
+    [SerializeField] private GameObject _gridCellPrefab;
+    [SerializeField] private GameObject _gridBackgroundPrefab;
 
     [Header("Placement Parameters")]
-    [SerializeField]
-    private float _cameraVerticalOffset;
-    [SerializeField]
-    private float _additionalCameraOrthographicSize;
-    [SerializeField]
-    private float _gridBackgroundAdditionalSize;
+    [SerializeField] private float _cameraVerticalOffset;
+    [SerializeField] private float _additionalCameraOrthographicSize;
+    [SerializeField] private float _gridBackgroundAdditionalSize;
 
     private Grid2D<MineSweeperCellContents> _gameBoard;
     private MineSweeperCellVisual[,] _boardVisuals;

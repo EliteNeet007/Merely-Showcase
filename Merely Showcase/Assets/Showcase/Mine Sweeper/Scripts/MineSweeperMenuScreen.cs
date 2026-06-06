@@ -8,53 +8,33 @@ using TMPro;
 public class MineSweeperMenuScreen : MonoBehaviour
 {
     [Header("Asset References")]
-    [SerializeField]
-    private MineSweeperEventsSO _mineSweeperEvents;
+    [SerializeField] private MineSweeperEventsSO _mineSweeperEvents;
 
     [Header("Object References")]
-    [SerializeField]
-    private GameObject _menuPanel;
-    [SerializeField]
-    private GameObject _heightSliderParent;
+    [SerializeField] private GameObject _menuPanel;
+    [SerializeField] private GameObject _heightSliderParent;
 
     [Header("Script References")]
-    [SerializeField]
-    private Toggle _heightEqualsWidthToggle;
-    [SerializeField]
-    private Slider _widthSlider;
-    [SerializeField]
-    private Slider _heightSlider;
-    [SerializeField]
-    private Toggle _mineSoftEnforcementToggle;
-    [SerializeField]
-    private Slider _mineCountSlider;
+    [SerializeField] private Toggle _heightEqualsWidthToggle;
+    [SerializeField] private Slider _widthSlider;
+    [SerializeField] private Slider _heightSlider;
+    [SerializeField] private Toggle _mineSoftEnforcementToggle;
+    [SerializeField] private Slider _mineCountSlider;
 
     [Header("Level Setup Parameters")]
-    [SerializeField]
-    private float _minMineCountMultiplier;
-    [SerializeField]
-    private float _maxMineCountMultiplier;
-    [SerializeField]
-    private float _easyRangeMinMultiplier;
-    [SerializeField]
-    private float _easyRangeMaxMultiplier;
-    [SerializeField]
-    private float _mediumRangeMinMultiplier;
-    [SerializeField]
-    private float _mediumRangeMaxMultiplier;
-    [SerializeField]
-    private float _hardRangeMinMultiplier;
-    [SerializeField]
-    private float _hardRangeMaxMultiplier;
-
+    [SerializeField] private float _minMineCountMultiplier;
+    [SerializeField] private float _maxMineCountMultiplier;
+    [SerializeField] private float _easyRangeMinMultiplier;
+    [SerializeField] private float _easyRangeMaxMultiplier;
+    [SerializeField] private float _mediumRangeMinMultiplier;
+    [SerializeField] private float _mediumRangeMaxMultiplier;
+    [SerializeField] private float _hardRangeMinMultiplier;
+    [SerializeField] private float _hardRangeMaxMultiplier;
 
     [Header("Level Setup Text Displays")]
-    [SerializeField]
-    private TextMeshProUGUI _widthSliderTextDisplay;
-    [SerializeField]
-    private TextMeshProUGUI _heightSliderTextDisplay;
-    [SerializeField]
-    private TextMeshProUGUI _mineCountSliderTextDisplay;
+    [SerializeField] private TextMeshProUGUI _widthSliderTextDisplay;
+    [SerializeField] private TextMeshProUGUI _heightSliderTextDisplay;
+    [SerializeField] private TextMeshProUGUI _mineCountSliderTextDisplay;
 
     private void OnDisable()
     {

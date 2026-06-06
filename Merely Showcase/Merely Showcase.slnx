@@ -1,0 +1,9 @@
+﻿<Solution>
+  <Project Path="RightNowGames.Grids.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="RightNowGames.GLOBAL.csproj" />
+  <Project Path="RightNowGames.Utilities.csproj" />
+  <Project Path="MineSweeper.csproj" />
+  <Project Path="Sirenix.OdinInspector.Modules.UnityMathematics.csproj" />
+  <Project Path="RightNowGames.Editor.csproj" />
+</Solution>

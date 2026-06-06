@@ -7,10 +7,8 @@ using RightNowGames.Basic;
 /// </summary>
 public class MineSweeperGameplayUI : StaticInstance<MineSweeperGameplayUI>
 {
-    [SerializeField]
-    private GameObject _gameplayUIParent;
-    [SerializeField]
-    private TextMeshProUGUI _flagsLeftUI;
+    [SerializeField] private GameObject _gameplayUIParent;
+    [SerializeField] private TextMeshProUGUI _flagsLeftUI;
 
     // Calls base Awake implementation to set-up static Instance.
     protected override void Awake()

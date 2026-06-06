@@ -8,22 +8,15 @@ using UnityEngine.UIElements.Experimental;
 public class MineSweeperCellVisual : MonoBehaviour
 {
     [Header("Object References")]
-    [SerializeField]
-    private SpriteRenderer _cellForegroundVisual;
-    [SerializeField]
-    private SpriteRenderer _cellBackgroundVisual;
-    [SerializeField]
-    private GameObject _flagObject;
-    [SerializeField]
-    private TextMeshPro _numberText;
+    [SerializeField] private SpriteRenderer _cellForegroundVisual;
+    [SerializeField] private SpriteRenderer _cellBackgroundVisual;
+    [SerializeField] private GameObject _flagObject;
+    [SerializeField] private TextMeshPro _numberText;
 
     [Header("Values")]
-    [SerializeField]
-    private Sprite _mineSprite;
-    [SerializeField]
-    private Sprite _cellForegroundSprite;
-    [SerializeField]
-    private Color _mineBackgroundColor;
+    [SerializeField] private Sprite _mineSprite;
+    [SerializeField] private Sprite _cellForegroundSprite;
+    [SerializeField] private Color _mineBackgroundColor;
 
     private bool _isFlagged;
     private bool _isMine;

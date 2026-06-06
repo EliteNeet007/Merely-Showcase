@@ -7,20 +7,15 @@ using TMPro;
 public class MineSweeperPostGameScreen : MonoBehaviour
 {
     [Header("Asset References")]
-    [SerializeField]
-    private MineSweeperEventsSO _mineSweeperEvents;
+    [SerializeField] private MineSweeperEventsSO _mineSweeperEvents;
 
     [Header("Object References")]
-    [SerializeField]
-    private GameObject _postGamePanel;
-    [SerializeField]
-    private TextMeshProUGUI _gameCompletionStateText;
+    [SerializeField] private GameObject _postGamePanel;
+    [SerializeField] private TextMeshProUGUI _gameCompletionStateText;
 
     [Header("Values")]
-    [SerializeField]
-    private Color _winTextColor;
-    [SerializeField]
-    private Color _loseTextColor;
+    [SerializeField] private Color _winTextColor;
+    [SerializeField] private Color _loseTextColor;
 
     private void OnDisable()
     {

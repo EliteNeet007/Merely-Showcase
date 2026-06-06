@@ -9,8 +9,7 @@ using System.Collections.Generic;
 public class MineSweeperManager : Singleton<MineSweeperManager>
 {
     [Header("Number Text Colors")]
-    [SerializeField]
-    private List<Color> _numberTextColors;
+    [SerializeField] private List<Color> _numberTextColors;
 
     private int _levelGridWidth;
     private int _levelGridHeight;
